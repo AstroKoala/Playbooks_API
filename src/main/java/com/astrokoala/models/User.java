@@ -55,16 +55,8 @@ public class User {
 	}
 	
 	public LinkedHashMap<?, ?> toLinkedHashMap() {
-//		LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
-//		map.put("id", this.id);
-//		map.put("email", this.getEmail());
-//		map.put("age", this.age);
-//		map.put("verified", this.getVerified());
-//		map.put("user_name", this.getUserName());
-//		map.put("ipAddress", this.getipAddress());
 		ObjectMapper oMapper = new ObjectMapper();
-		LinkedHashMap<?, ?> map = oMapper.convertValue(this, LinkedHashMap.class);
-		return map;
+		return oMapper.convertValue(this, LinkedHashMap.class);
 	}
 	
 }

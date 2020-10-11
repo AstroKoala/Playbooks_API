@@ -3,42 +3,44 @@ package com.astrokoala.services;
 import java.util.LinkedHashMap;
 
 import org.jooq.Configuration;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.astrokoala.application.Config;
 import com.astrokoala.database.Routines;
 
+@RestController
+@ComponentScan
 public class RegisterService {
 	
 	private Configuration conf = Config.database.configuration();
 
-	@RequestMapping("/register")
+	@GetMapping(path = "/register")
   @ResponseBody
-  public ResponseEntity<?> register( @RequestParam(value="email", defaultValue="") String email,
-  																	 @RequestParam(value="pass", defaultValue="") String pass,
-  																	 @RequestParam(value="username", defaultValue="") String username
-  																  ) {
+  public ResponseEntity<?> register( @RequestParam(value="email", defaultValue="") String email, @RequestParam(value="pass", defaultValue="") String pass, @RequestParam(value="username", defaultValue="") String username) {
+  	LinkedHashMap<String, Object> map = new LinkedHashMap<>();
   	try {
-  		//Routines.addNewUser(conf, email, PasswordService.getSaltedHash(pass), username);
-  		return new ResponseEntity<>(HttpStatus.OK);
+  		Routines.createNewUser(conf, email, PasswordService.getSaltedHash(pass), username);
   	} catch (Exception e) {
+  		map.put("success", false);
   		if (e.getMessage().contains("Duplicate entry")) {
-  			LinkedHashMap<String, String> map = new LinkedHashMap<>();
   			if (e.getMessage().contains("email_UNIQUE")) {
-  				map.put("error_msg", "There's already an account associated with that email.");
+  				map.put("error", "An account is already associated with that email.");
+    			return new ResponseEntity<>(map, HttpStatus.CONFLICT);	
   			}
-  			if (e.getMessage().contains("user_name_UNIQUE")) {
-  				map.put("error_msg", "Sorry, that username is taken.");
-  			}
-  			return new ResponseEntity<>(map, HttpStatus.OK);
   		}
   		else {
-  			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+  			map.put("error", e.getCause().toString());
+  			return new ResponseEntity<>(map, HttpStatus.INTERNAL_SERVER_ERROR);
   		}
   	}
+  	map.put("success", true);
+		return new ResponseEntity<>(map, HttpStatus.OK);
   }
+	
 }

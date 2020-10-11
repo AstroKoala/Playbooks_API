@@ -12,17 +12,16 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackages = "com.astrokoala")
 public class Config {
 	
-	public static DSLContext database; 
-	
-	private static final String userName = "root";
-	private static final String password = "";
-	private static final String timeZone = "?serverTimezone=UTC";
-	private static final String url = "jdbc:mysql://localhost:3333/Playbooks" + timeZone;
+	private static final String USERNAME = "root";
+	private static final String PASSWORD = "";
+	private static final String TIMEZONE = "?serverTimezone=UTC";
+	private static final String URL = "jdbc:mysql://localhost:3333/Playbooks" + TIMEZONE;
+	public static DSLContext database;
 	
 	public static int connectToDatabase() {
 	  try {
 	  	Class.forName("com.mysql.cj.jdbc.Driver");
-	  	Connection conn = DriverManager.getConnection(url, userName, password);
+	  	Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
 	  	database = DSL.using(conn);
 	  	return 0;
 	  } 

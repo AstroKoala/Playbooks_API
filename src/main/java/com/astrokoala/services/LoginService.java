@@ -1,9 +1,12 @@
 package com.astrokoala.services;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
 import org.jooq.Configuration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,23 +23,20 @@ public class LoginService {
 	
 	 	private Configuration conf = Config.database.configuration();
 	     
-    @RequestMapping("/login")
+    @GetMapping("/login")
     @ResponseBody
-    public ResponseEntity<?> login( @RequestParam(value ="email") String email, @RequestParam(value ="pass") String passwd) {
+    public ResponseEntity<?> login( @RequestParam(value ="email") String email, @RequestParam(value ="pass") String passwd) throws NoSuchAlgorithmException, InvalidKeySpecException {
     	GetUserInfoByEmail proc = Routines.getUserInfoByEmail(conf, email);
     	// we won't have pass to check against if email isn't valid, so both cases will return false
-//    	if (!PasswordService.check(passwd, proc.getPass())) {
-    	if (passwd.equals(proc.getPass())) {
-    		//return new ResponseEntity<>(new User().toLinkedHashMap(), HttpStatus.OK);
-    		User user = new User(
+    	if (!PasswordService.check(passwd, proc.getPass()))
+    		return new ResponseEntity<>(new User().toLinkedHashMap(), HttpStatus.UNAUTHORIZED);
+    	else
+    		return new ResponseEntity<>(new User(
     				proc.getId().intValue(),
     				email,
     				proc.getUsername(),
     				proc.getCreateDate()
-    		);
-      	return new ResponseEntity<>(user.toLinkedHashMap(), HttpStatus.OK);
-    	}
-    	return new ResponseEntity<>(new User().toLinkedHashMap(), HttpStatus.UNAUTHORIZED);
+    		).toLinkedHashMap(), HttpStatus.OK);
     }
     
 }
